@@ -1,40 +1,48 @@
+import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "../views/Dashboard";
 import Login from "../views/Login";
+import AuthGuard from "../guards/AuthGuard";
+import GuestGuard from "../guards/GuestGuard";
+import DashboardLayout from "../layouts/DashboardLayout";
+import { IRoute } from "../types";
 
-interface RouteConfig {
-    element: React.ComponentType;
-    path: string;
-}
+export const routes: IRoute[] = [
+  {
+    path: "/",
+    element: Dashboard,
+    guard: AuthGuard,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/login",
+    element: Login,
+    guard: GuestGuard,
+  },
+];
 
-export const routes = [
-    {
-        path:"/",
-        element: Dashboard,
-    },
-    {
-        path:"/login",
-        element: Login,
-    },
-]
+export const renderRoutes = (routes: IRoute[]) => {
+  return (
+    <Routes>
+      {routes?.map((route: IRoute, index: number) => {
+        const Component = route.element;
+        const Guard = route.guard || React.Fragment;
+        const Layout = route.layout || React.Fragment;
 
-// export const renderRoutes = (routes: { element: any; path: any; }[]) => {
-//     return (
-//         <Routes>
-//             {routes?.map((route: { element: any; path: any; },index: any) => {
-//                 const Component = route.element;
-//                 return <Route key={index} path={route.path} element={<Component />} />
-//             })}
-//         </Routes>
-//     )
-// }
-
-export const renderRoutes = (routes: RouteConfig[]) => {
-    return (
-        <Routes>
-            {routes?.map(({ element: Component, path }, index) => (
-                <Route key={index} path={path} element={<Component />} />
-            ))}
-        </Routes>
-    );
+        return (
+          <Route
+            key={index}
+            path={route.path}
+            element={
+              <Guard>
+                <Layout>
+                  <Component />
+                </Layout>
+              </Guard>
+            }
+          />
+        );
+      })}
+    </Routes>
+  );
 };
